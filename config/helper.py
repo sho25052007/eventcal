@@ -10,3 +10,4 @@ def get_current_user():
         user_id_list.append(data.get('_auth_user_id', None))
     user = User.objects.get(id=user_id_list[0])
     return user
+

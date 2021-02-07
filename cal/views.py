@@ -13,12 +13,13 @@ from .models import Event, EventMember
 from .utils import Calendar
 from .forms import EventForm, AddMemberForm
 
+@login_required(login_url='signup')
 def index(request):
     return HttpResponse('hello')
 
-class CalendarView(generic.ListView):
+class CalendarView(LoginRequiredMixin, generic.ListView):
     model = Event
-    template_name = 'cal/calendar.html'
+    template_name = 'calendar.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -55,6 +56,7 @@ def next_month(d):
     month = 'month=' + str(next_month.year) + '-' + str(next_month.month)
     return month
 
+@login_required(login_url='signup')
 def create_event(request):
     form = EventForm(request.POST or None)
     if request.POST and form.is_valid():
@@ -71,12 +73,12 @@ def create_event(request):
         )    
         
         return HttpResponseRedirect(reverse('cal:calendar'))
-    return render(request, 'cal/event.html', {'form': form})
+    return render(request, 'event.html', {'form': form})
 
 class EventEdit(generic.UpdateView):
     model = Event
     fields = ['title', 'description', 'start_time', 'end_time']
-    template_name = 'cal/event.html'
+    template_name = 'event.html'
 
 @login_required(login_url='signup')
 def event_details(request, event_id):
@@ -86,7 +88,7 @@ def event_details(request, event_id):
         'event': event,
         'eventmember': eventmember
     }
-    return render(request, 'cal/event_details.html', context)
+    return render(request, 'event_details.html', context)
 
 
 def add_eventmember(request, event_id):
@@ -114,3 +116,4 @@ class EventMemberDeleteView(generic.DeleteView):
     model = EventMember
     template_name = 'event_delete.html'
     success_url = reverse_lazy('cal:calendar')
+
