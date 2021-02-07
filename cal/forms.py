@@ -1,5 +1,6 @@
 from django.forms import ModelForm, DateInput
-from cal.models import Event
+from cal.models import Event, EventMember
+from django import forms
 
 class EventForm(ModelForm):
     class Meta:
@@ -18,4 +19,11 @@ class EventForm(ModelForm):
         self.fields['end-time'].input_formats = ('%Y-%m-%dT%H:%M',)
 
 
+class SignupForm(forms.Form):
+    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}))
 
+class AddMemberForm(forms.ModelForm):
+    class Meta:
+        model = EventMember
+        fields = ['user']

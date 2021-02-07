@@ -3,13 +3,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views import generic
 from django.utils.safestring import mark_safe
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 import calendar
 
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .models import Event
+from .models import Event, EventMember
 from .utils import Calendar
-from .forms import EventForm
+from .forms import EventForm, AddMemberForm
 
 def index(request):
     return HttpResponse('hello')
@@ -76,13 +78,39 @@ class EventEdit(generic.UpdateView):
     fields = ['title', 'description', 'start_time', 'end_time']
     template_name = 'cal/event.html'
 
-
+@login_required(login_url='signup')
 def event_details(request, event_id):
     event = Event.objects.get(id=event_id)
+    eventmember = EventMember.objects.filter(event=event)
     context = {
         'event': event,
+        'eventmember': eventmember
     }
     return render(request, 'cal/event_details.html', context)
 
 
+def add_eventmember(request, event_id):
+    forms = AddMemberForm()
+    if request.method == 'POST':
+        forms = AddMemberForm(request.POST)
+        if forms.is_valid():
+            member = EventMember.objects.filter(event=event_id)
+            event = Event.objects.get(id=event_id)
+            if member.count() <= 9:
+                user = forms.cleaned_data['user']
+                EventMember.objects.create(
+                    event=event,
+                    user=user
+                )
+                return redirect('cal:calendar')
+            else:
+                print('--------------User limit exceed!-----------------')
+    context = {
+        'form': forms
+    }
+    return render(request, 'add_member.html', context)
 
+class EventMemberDeleteView(generic.DeleteView):
+    model = EventMember
+    template_name = 'event_delete.html'
+    success_url = reverse_lazy('cal:calendar')
