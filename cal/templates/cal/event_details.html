@@ -1,0 +1,23 @@
+{% extends 'cal/base.html' %}
+
+{% block title %}
+Event Details
+{% endblock title %}
+
+{% block content %}
+    <div class="container">
+        <div class="clearfix">
+            <a class="btn btn-primary left" href="{% url 'cal:calendar' %}"> Calendar </a>
+            <a class="btn btn-info right mr-2" href="{% url 'cal:event_edit' event.pk %}"> Edit Event </a>
+        </div>
+
+        <div class="clearfix">
+            <h3>Event: {{ event.title }}</h3>
+            <p>From <span style="color: black;">{{ event.start_time }}</span> --- To
+                <span style="color: black;">{{ event.end_time }}</span></p>
+            <hr>
+            <p>{{ event.description }}</p>
+        </div>
+    </div>
+{% endblock content %}
+
